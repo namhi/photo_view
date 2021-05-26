@@ -156,8 +156,9 @@ class PhotoViewCoreState extends State<PhotoViewCore>
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     final double newScale = _scaleBefore! * details.scale;
-    final Offset delta = details.focalPoint - _normalizedPosition!;
 
+    final Offset delta = details.focalPoint - _normalizedPosition!;
+    widget.onScaleUpdate?.call(context, details, controller.value);
     updateScaleStateFromNewScale(newScale);
 
     //
@@ -166,7 +167,7 @@ class PhotoViewCoreState extends State<PhotoViewCore>
       position: clampPosition(position: delta * details.scale),
       rotation:
           widget.enableRotation ? _rotationBefore! + details.rotation : null,
-      rotationFocusPoint: widget.enableRotation ? details.focalPoint : null, details: details,
+      rotationFocusPoint: widget.enableRotation ? details.focalPoint : null,
     );
   }
 

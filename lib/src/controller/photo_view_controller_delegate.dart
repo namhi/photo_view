@@ -104,8 +104,7 @@ mixin PhotoViewControllerDelegate on State<PhotoViewCore> {
       {Offset? position,
       double? scale,
       double? rotation,
-      Offset? rotationFocusPoint,
-      required ScaleUpdateDetails details}) {
+      Offset? rotationFocusPoint,}) {
     controller.updateMultiple(
       position: position,
       scale: scale,
@@ -113,7 +112,7 @@ mixin PhotoViewControllerDelegate on State<PhotoViewCore> {
       rotationFocusPoint: rotationFocusPoint,
     );
 
-    widget.onScaleUpdate?.call(context, details, controller.value);
+
   }
 
   void updateScaleStateFromNewScale(double newScale) {

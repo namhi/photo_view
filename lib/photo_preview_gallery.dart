@@ -177,11 +177,40 @@ class PhotoPreviewGallery extends StatefulWidget {
   }
 }
 
-class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
+class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
+    with SingleTickerProviderStateMixin {
   late final PageController _controller =
       widget.pageController ?? PageController();
 
+  ///animation to visible or invisible preview photos when zoom
+  late AnimationController _animationController;
+
   late PhotoGalleryController _photoGalleryController;
+
+  late Animation<double> _opacityAnimation;
+  late Animation<double> _sizeAnimation;
+
+  @override
+  void initState() {
+    _photoGalleryController = PhotoGalleryController(page: actualPage);
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _opacityAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.linear);
+    _opacityAnimation =
+        Tween<double>(begin: 1.0, end: 0.0).animate(_opacityAnimation);
+    _sizeAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.elasticOut);
+    _sizeAnimation =
+        Tween<double>(begin: 1.0, end: 0.0).animate(_sizeAnimation);
+    _currentPage = actualPage;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   void scaleStateChangedCallback(PhotoViewScaleState scaleState) {
     if (widget.scaleStateChangedCallback != null) {
@@ -200,18 +229,6 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
       return widget.itemCount!;
     }
     return widget.pageOptions!.length;
-  }
-
-  @override
-  void initState() {
-    _photoGalleryController = PhotoGalleryController(page: actualPage);
-    _currentPage = actualPage;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -238,13 +255,29 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
             ),
           ),
         ),
-        Container(
-          height: 100,
-          child: _buildPreviewPhotos(),
-        )
+        SizeTransition(
+          sizeFactor: _sizeAnimation,
+          child: FadeTransition(
+            opacity: _opacityAnimation,
+            child: Container(
+              height: 100,
+              child: _buildPreviewPhotos(),
+            ),
+          ),
+        ),
+        // if (!_animationController.isCompleted)
+        //   FadeTransition(
+        //     opacity: _opacityAnimation,
+        //     child: Container(
+        //       height: 100,
+        //       child: _buildPreviewPhotos(),
+        //     ),
+        //   ),
       ],
     );
   }
+
+  double _scale = 1;
 
   Widget _buildItem(BuildContext context, int index) {
     final pageOption = _buildPageOption(context, index);
@@ -268,14 +301,36 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
             scaleStateCycle: pageOption.scaleStateCycle,
             onTapUp: pageOption.onTapUp,
             onTapDown: pageOption.onTapDown,
-            onScaleEnd: pageOption.onScaleEnd,
             gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
             tightMode: pageOption.tightMode,
             filterQuality: pageOption.filterQuality,
             basePosition: pageOption.basePosition,
             disableGestures: pageOption.disableGestures,
-            onScaleStart: pageOption.onScaleStart,
+            onScaleStart: (BuildContext context, ScaleStartDetails details,
+                PhotoViewControllerValue controllerValue) {
+              if (_animationController.isCompleted ||
+                  _animationController.isAnimating) {
+                return;
+              }
+
+              ///start hide preview photos
+              _animationController.forward();
+
+              pageOption.onScaleStart?.call(context, details, controllerValue);
+            },
             onScaleUpdate: pageOption.onScaleUpdate,
+            onScaleEnd: (
+              BuildContext context,
+              ScaleEndDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              pageOption.onScaleEnd?.call(context, details, controllerValue);
+              if (_animationController.isCompleted ||
+                  _animationController.isAnimating) {
+                ///start show preview photos
+                _animationController.reverse();
+              }
+            },
           )
         : PhotoView(
             key: ObjectKey(index),
@@ -295,15 +350,51 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
             scaleStateCycle: pageOption.scaleStateCycle,
             onTapUp: pageOption.onTapUp,
             onTapDown: pageOption.onTapDown,
-            onScaleEnd: pageOption.onScaleEnd,
             gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
             tightMode: pageOption.tightMode,
             filterQuality: pageOption.filterQuality,
             basePosition: pageOption.basePosition,
             disableGestures: pageOption.disableGestures,
             errorBuilder: pageOption.errorBuilder,
-            onScaleStart: pageOption.onScaleStart,
-            onScaleUpdate: pageOption.onScaleUpdate,
+            onScaleStart: (BuildContext context, ScaleStartDetails details,
+                PhotoViewControllerValue controllerValue) {
+              pageOption.onScaleStart?.call(context, details, controllerValue);
+              // _scale = controllerValue.scale?? 1;
+              //
+              // print(_scale);
+              // if (!(_animationController.isCompleted ||
+              //     _animationController.isAnimating)) {
+              //   ///start hide preview photos
+              //
+              //   Future.delayed(const Duration(milliseconds: 500), () {
+              //     _animationController.forward();
+              //   });
+              // }
+            },
+            onScaleUpdate: (
+              BuildContext context,
+              ScaleUpdateDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              print(details.scale);
+              pageOption.onScaleUpdate?.call(context, details, controllerValue);
+            },
+            onScaleEnd: (
+              BuildContext context,
+              ScaleEndDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              pageOption.onScaleEnd?.call(context, details, controllerValue);
+
+              // if (_animationController.isCompleted ||
+              //     _animationController.isAnimating) {
+              //   ///start show preview photos
+              //
+              //   Future.delayed(const Duration(milliseconds: 500), () {
+              //     _animationController.reverse();
+              //   });
+              // }
+            },
           );
 
     return ClipRect(

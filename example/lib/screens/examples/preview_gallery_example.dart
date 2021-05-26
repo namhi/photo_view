@@ -23,6 +23,7 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
               child: Container(
             height: MediaQuery.of(context).size.height,
             child: PhotoPreviewGallery.builder(
+
               // pageOptions: [],
               builder: (BuildContext context, int index) {
                 return PhotoViewGalleryPageOptions(
