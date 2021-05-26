@@ -54,6 +54,7 @@ class _DialogExampleState extends State<DialogExample> {
                   tightMode: true,
                   imageProvider: const AssetImage("assets/large-image.jpg"),
                   heroAttributes: const PhotoViewHeroAttributes(tag: "someTag"),
+                  scaleStateChangedCallback: (PhotoViewScaleState state) {},
                 ),
               ),
             ),

@@ -1,19 +1,20 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:photo_view/photo_view.dart'
     show
-        PhotoViewScaleState,
         PhotoViewHeroAttributes,
+        PhotoViewImageScaleEndCallback,
+        PhotoViewImageScaleStartCallback,
+        PhotoViewImageScaleUpdateCallback,
         PhotoViewImageTapDownCallback,
         PhotoViewImageTapUpCallback,
-        PhotoViewImageScaleEndCallback,
+        PhotoViewScaleState,
         ScaleStateCycle;
 import 'package:photo_view/src/controller/photo_view_controller.dart';
 import 'package:photo_view/src/controller/photo_view_controller_delegate.dart';
 import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
-import 'package:photo_view/src/utils/photo_view_utils.dart';
 import 'package:photo_view/src/core/photo_view_gesture_detector.dart';
 import 'package:photo_view/src/core/photo_view_hit_corners.dart';
+import 'package:photo_view/src/utils/photo_view_utils.dart';
 
 const _defaultDecoration = const BoxDecoration(
   color: const Color.fromRGBO(0, 0, 0, 1.0),
@@ -41,6 +42,8 @@ class PhotoViewCore extends StatefulWidget {
     required this.tightMode,
     required this.filterQuality,
     required this.disableGestures,
+    this.onScaleStart,
+    this.onScaleUpdate,
   })  : customChild = null,
         super(key: key);
 
@@ -53,6 +56,8 @@ class PhotoViewCore extends StatefulWidget {
     this.onTapUp,
     this.onTapDown,
     this.onScaleEnd,
+    this.onScaleStart,
+    this.onScaleUpdate,
     this.gestureDetectorBehavior,
     required this.controller,
     required this.scaleBoundaries,
@@ -82,6 +87,8 @@ class PhotoViewCore extends StatefulWidget {
   final PhotoViewImageTapUpCallback? onTapUp;
   final PhotoViewImageTapDownCallback? onTapDown;
   final PhotoViewImageScaleEndCallback? onScaleEnd;
+  final PhotoViewImageScaleStartCallback? onScaleStart;
+  final PhotoViewImageScaleUpdateCallback? onScaleUpdate;
 
   final HitTestBehavior? gestureDetectorBehavior;
   final bool tightMode;
@@ -143,6 +150,8 @@ class PhotoViewCoreState extends State<PhotoViewCore>
     _scaleAnimationController.stop();
     _positionAnimationController.stop();
     _rotationAnimationController.stop();
+
+    widget.onScaleStart?.call(context, details, controller.value);
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
@@ -157,7 +166,7 @@ class PhotoViewCoreState extends State<PhotoViewCore>
       position: clampPosition(position: delta * details.scale),
       rotation:
           widget.enableRotation ? _rotationBefore! + details.rotation : null,
-      rotationFocusPoint: widget.enableRotation ? details.focalPoint : null,
+      rotationFocusPoint: widget.enableRotation ? details.focalPoint : null, details: details,
     );
   }
 

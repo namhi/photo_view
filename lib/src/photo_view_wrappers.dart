@@ -31,6 +31,8 @@ class ImageWrapper extends StatefulWidget {
     required this.filterQuality,
     required this.disableGestures,
     required this.errorBuilder,
+    this.onScaleStart,
+    this.onScaleUpdate,
   }) : super(key: key);
 
   final ImageProvider imageProvider;
@@ -51,6 +53,10 @@ class ImageWrapper extends StatefulWidget {
   final PhotoViewImageTapUpCallback? onTapUp;
   final PhotoViewImageTapDownCallback? onTapDown;
   final PhotoViewImageScaleEndCallback? onScaleEnd;
+
+  final PhotoViewImageScaleStartCallback? onScaleStart;
+
+  final PhotoViewImageScaleUpdateCallback? onScaleUpdate;
   final Size outerSize;
   final HitTestBehavior? gestureDetectorBehavior;
   final bool? tightMode;
@@ -187,6 +193,8 @@ class _ImageWrapperState extends State<ImageWrapper> {
       tightMode: widget.tightMode ?? false,
       filterQuality: widget.filterQuality ?? FilterQuality.none,
       disableGestures: widget.disableGestures ?? false,
+      onScaleStart: widget.onScaleStart,
+      onScaleUpdate: widget.onScaleUpdate,
     );
   }
 
@@ -213,30 +221,32 @@ class _ImageWrapperState extends State<ImageWrapper> {
 }
 
 class CustomChildWrapper extends StatelessWidget {
-  const CustomChildWrapper({
-    Key? key,
-    this.child,
-    required this.childSize,
-    required this.backgroundDecoration,
-    this.heroAttributes,
-    this.scaleStateChangedCallback,
-    required this.enableRotation,
-    required this.controller,
-    required this.scaleStateController,
-    required this.maxScale,
-    required this.minScale,
-    required this.initialScale,
-    required this.basePosition,
-    required this.scaleStateCycle,
-    this.onTapUp,
-    this.onTapDown,
-    this.onScaleEnd,
-    required this.outerSize,
-    this.gestureDetectorBehavior,
-    required this.tightMode,
-    required this.filterQuality,
-    required this.disableGestures,
-  }) : super(key: key);
+  const CustomChildWrapper(
+      {Key? key,
+      this.child,
+      required this.childSize,
+      required this.backgroundDecoration,
+      this.heroAttributes,
+      this.scaleStateChangedCallback,
+      required this.enableRotation,
+      required this.controller,
+      required this.scaleStateController,
+      required this.maxScale,
+      required this.minScale,
+      required this.initialScale,
+      required this.basePosition,
+      required this.scaleStateCycle,
+      this.onTapUp,
+      this.onTapDown,
+      this.onScaleEnd,
+      required this.outerSize,
+      this.gestureDetectorBehavior,
+      required this.tightMode,
+      required this.filterQuality,
+      required this.disableGestures,
+      this.onScaleUpdate,
+      this.onScaleStart})
+      : super(key: key);
 
   final Widget? child;
   final Size? childSize;
@@ -257,6 +267,8 @@ class CustomChildWrapper extends StatelessWidget {
   final PhotoViewImageTapUpCallback? onTapUp;
   final PhotoViewImageTapDownCallback? onTapDown;
   final PhotoViewImageScaleEndCallback? onScaleEnd;
+  final PhotoViewImageScaleStartCallback? onScaleStart;
+  final PhotoViewImageScaleUpdateCallback? onScaleUpdate;
   final Size outerSize;
   final HitTestBehavior? gestureDetectorBehavior;
   final bool? tightMode;
@@ -290,6 +302,8 @@ class CustomChildWrapper extends StatelessWidget {
       tightMode: tightMode ?? false,
       filterQuality: filterQuality ?? FilterQuality.none,
       disableGestures: disableGestures ?? false,
+      onScaleStart: onScaleStart,
+      onScaleUpdate: onScaleUpdate,
     );
   }
 }

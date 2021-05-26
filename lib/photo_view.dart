@@ -1,7 +1,6 @@
 library photo_view;
 
 import 'package:flutter/material.dart';
-
 import 'package:photo_view/src/controller/photo_view_controller.dart';
 import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
 import 'package:photo_view/src/core/photo_view_core.dart';
@@ -257,6 +256,8 @@ class PhotoView extends StatefulWidget {
     this.filterQuality,
     this.disableGestures,
     this.errorBuilder,
+    this.onScaleStart,
+    this.onScaleUpdate,
   })  : child = null,
         childSize = null,
         super(key: key);
@@ -290,6 +291,8 @@ class PhotoView extends StatefulWidget {
     this.tightMode,
     this.filterQuality,
     this.disableGestures,
+    this.onScaleStart,
+    this.onScaleUpdate,
   })  : errorBuilder = null,
         imageProvider = null,
         gaplessPlayback = false,
@@ -373,6 +376,14 @@ class PhotoView extends StatefulWidget {
   /// A pointer that will trigger a scale has stopped contacting the screen at a
   /// particular location.
   final PhotoViewImageScaleEndCallback? onScaleEnd;
+
+  /// A pointer that will trigger a scale has start contacting the screen at a
+  /// particular location.
+  final PhotoViewImageScaleStartCallback? onScaleStart;
+
+  /// A pointer that will trigger a scale has update contacting the screen at a
+  /// particular location.
+  final PhotoViewImageScaleUpdateCallback? onScaleUpdate;
 
   /// [HitTestBehavior] to be passed to the internal gesture detector.
   final HitTestBehavior? gestureDetectorBehavior;
@@ -505,6 +516,8 @@ class _PhotoViewState extends State<PhotoView> {
                 tightMode: widget.tightMode,
                 filterQuality: widget.filterQuality,
                 disableGestures: widget.disableGestures,
+          onScaleStart: widget.onScaleStart,
+          onScaleUpdate: widget.onScaleUpdate,
               )
             : ImageWrapper(
                 imageProvider: widget.imageProvider!,
@@ -530,6 +543,8 @@ class _PhotoViewState extends State<PhotoView> {
                 filterQuality: widget.filterQuality,
                 disableGestures: widget.disableGestures,
                 errorBuilder: widget.errorBuilder,
+          onScaleStart: widget.onScaleStart,
+          onScaleUpdate: widget.onScaleUpdate,
               );
       },
     );
@@ -578,6 +593,20 @@ typedef PhotoViewImageTapDownCallback = Function(
 typedef PhotoViewImageScaleEndCallback = Function(
   BuildContext context,
   ScaleEndDetails details,
+  PhotoViewControllerValue controllerValue,
+);
+
+/// A type definition for a callback when a user start scale
+typedef PhotoViewImageScaleStartCallback = Function(
+  BuildContext context,
+  ScaleStartDetails details,
+  PhotoViewControllerValue controllerValue,
+);
+
+/// A type definition for a callback when a user update scale
+typedef PhotoViewImageScaleUpdateCallback = Function(
+  BuildContext context,
+  ScaleUpdateDetails details,
   PhotoViewControllerValue controllerValue,
 );
 
