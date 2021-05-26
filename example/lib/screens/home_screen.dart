@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view_example/screens/common/app_bar.dart';
+import 'package:photo_view_example/screens/examples/common_use_cases_examples.dart';
 import 'package:photo_view_example/screens/examples/controller_example.dart';
 import 'package:photo_view_example/screens/examples/custom_child_examples.dart';
 import 'package:photo_view_example/screens/examples/dialog_example.dart';
-import 'package:photo_view_example/screens/examples/common_use_cases_examples.dart';
 import 'package:photo_view_example/screens/examples/gallery/gallery_example.dart';
 import 'package:photo_view_example/screens/examples/hero_example.dart';
 import 'package:photo_view_example/screens/examples/inline_examples.dart';
 import 'package:photo_view_example/screens/examples/rotation_examples.dart';
 
 import 'examples/network_images.dart';
+import 'examples/preview_gallery_example.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -125,6 +126,18 @@ class HomeScreen extends StatelessWidget {
                     );
                   },
                   text: "Integrated to dialogs",
+                ),
+                _buildItem(
+                  context,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PreviewGalleryExample(),
+                      ),
+                    );
+                  },
+                  text: "Integrated to preview gallery",
                 ),
                 _buildItem(
                   context,

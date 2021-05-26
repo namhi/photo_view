@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+part of 'photo_view_gallery.dart';
 
 /// A [StatefulWidget] that shows multiple [PhotoView] widgets in a [PageView]
 ///
@@ -93,6 +91,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.scrollPhysics,
     this.scrollDirection = Axis.horizontal,
     this.customSize,
+    this.previewOptions,
+    this.backgroundColor = Colors.black,
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -100,28 +100,33 @@ class PhotoPreviewGallery extends StatefulWidget {
   /// Construct a gallery with dynamic items.
   ///
   /// The builder must return a [PhotoViewGalleryPageOptions].
-  const PhotoPreviewGallery.builder({
-    Key? key,
-    required this.itemCount,
-    required this.builder,
-    this.loadingBuilder,
-    this.backgroundDecoration,
-    this.gaplessPlayback = false,
-    this.reverse = false,
-    this.pageController,
-    this.onPageChanged,
-    this.scaleStateChangedCallback,
-    this.enableRotation = false,
-    this.scrollPhysics,
-    this.scrollDirection = Axis.horizontal,
-    this.customSize,
-  })  : pageOptions = null,
+  const PhotoPreviewGallery.builder(
+      {Key? key,
+      required this.itemCount,
+      required this.builder,
+      this.loadingBuilder,
+      this.backgroundDecoration,
+      this.gaplessPlayback = false,
+      this.reverse = false,
+      this.pageController,
+      this.onPageChanged,
+      this.scaleStateChangedCallback,
+      this.enableRotation = false,
+      this.scrollPhysics,
+      this.scrollDirection = Axis.horizontal,
+      this.customSize,
+      this.previewOptions,
+      this.backgroundColor = Colors.black})
+      : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
         super(key: key);
 
   /// A list of options to describe the items in the gallery
   final List<PhotoViewGalleryPageOptions>? pageOptions;
+
+  ///Preview option to build preview item
+  final List<PhotoPreviewOptions>? previewOptions;
 
   /// The count of items in the gallery, only used when constructed via [PhotoViewGallery.builder]
   final int? itemCount;
@@ -162,6 +167,8 @@ class PhotoPreviewGallery extends StatefulWidget {
   /// The axis along which the [PageView] scrolls. Mirror to [PageView.scrollDirection]
   final Axis scrollDirection;
 
+  final Color backgroundColor;
+
   bool get _isBuilder => builder != null;
 
   @override
@@ -174,6 +181,8 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
   late final PageController _controller =
       widget.pageController ?? PageController();
 
+  late PhotoGalleryController _photoGalleryController;
+
   void scaleStateChangedCallback(PhotoViewScaleState scaleState) {
     if (widget.scaleStateChangedCallback != null) {
       widget.scaleStateChangedCallback!(scaleState);
@@ -184,6 +193,8 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
     return _controller.hasClients ? _controller.page!.floor() : 0;
   }
 
+  int _currentPage = 0;
+
   int get itemCount {
     if (widget._isBuilder) {
       return widget.itemCount!;
@@ -192,19 +203,46 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
   }
 
   @override
+  void initState() {
+    _photoGalleryController = PhotoGalleryController(page: actualPage);
+    _currentPage = actualPage;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Enable corner hit test
-    return PhotoViewGestureDetectorScope(
-      axis: widget.scrollDirection,
-      child: PageView.builder(
-        reverse: widget.reverse,
-        controller: _controller,
-        onPageChanged: widget.onPageChanged,
-        itemCount: itemCount,
-        itemBuilder: _buildItem,
-        scrollDirection: widget.scrollDirection,
-        physics: widget.scrollPhysics,
-      ),
+    return Column(
+      children: [
+        Expanded(
+          child: PhotoViewGestureDetectorScope(
+            axis: widget.scrollDirection,
+            child: PageView.builder(
+              reverse: widget.reverse,
+              controller: _controller,
+              onPageChanged: (int page) {
+                if (_currentPage != page) {
+                  _currentPage = page;
+                  _photoGalleryController.changePage(page);
+                  widget.onPageChanged?.call(page);
+                }
+              },
+              itemCount: itemCount,
+              itemBuilder: _buildItem,
+              scrollDirection: widget.scrollDirection,
+              physics: widget.scrollPhysics,
+            ),
+          ),
+        ),
+        Container(
+          height: 100,
+          child: _buildPreviewPhotos(),
+        )
+      ],
     );
   }
 
@@ -273,6 +311,22 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
     );
   }
 
+  Widget _buildPreviewPhotos() {
+    return _PreviewGallery(
+      itemCount: itemCount,
+      previewOptions: widget.previewOptions,
+      photoGalleryController: _photoGalleryController,
+      backgroundColor: widget.backgroundColor,
+      onPageChanged: (int page) {
+        print(page);
+        _currentPage = _photoGalleryController.page;
+        widget.onPageChanged?.call(_photoGalleryController.page);
+        _controller.animateToPage(page,
+            duration: const Duration(milliseconds: 500), curve: Curves.linear);
+      },
+    );
+  }
+
   PhotoViewGalleryPageOptions _buildPageOption(
       BuildContext context, int index) {
     if (widget._isBuilder) {
@@ -287,32 +341,35 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery> {
 /// The [maxScale], [minScale] and [initialScale] options may be [double] or a [PhotoViewComputedScale] constant
 ///
 class PhotoPreviewOptions {
-  PhotoPreviewOptions({
-    Key? key,
-    required this.imageProvider,
-    this.gestureDetectorBehavior,
-    this.tightMode,
-    this.disableGestures,
-    this.errorBuilder,
-    this.onPressed,
-  })  : child = null,
+  PhotoPreviewOptions(
+      {Key? key,
+      required this.imageProvider,
+      this.gestureDetectorBehavior,
+      this.tightMode,
+      this.disableGestures,
+      this.errorBuilder,
+      this.onPressed,
+      this.selectedBuilder})
+      : child = null,
         childSize = null,
         assert(imageProvider != null);
 
-  PhotoPreviewOptions.customChild({
-    required this.child,
-    this.gestureDetectorBehavior,
-    this.tightMode,
-    this.disableGestures,
-    this.onPressed,
-    this.childSize,
-  })  : errorBuilder = null,
+  PhotoPreviewOptions.customChild(
+      {required this.child,
+      this.gestureDetectorBehavior,
+      this.tightMode,
+      this.disableGestures,
+      this.onPressed,
+      this.childSize,
+      this.selectedBuilder})
+      : errorBuilder = null,
         imageProvider = null;
 
   /// Mirror to [PhotoView.imageProvider]
   final ImageProvider? imageProvider;
 
   final Widget? child;
+  final PreviewGalleryBuilder? selectedBuilder;
 
   final Size? childSize;
 
@@ -335,89 +392,146 @@ class PhotoPreviewOptions {
 /// A type definition for a callback when the user taps up the photoview region
 typedef PhotoPreviewOnPressed = void Function();
 
+/// A type definition for a [Function] that defines a page in [_PreviewGallery.build]
+typedef PreviewGalleryBuilder = Widget Function(
+    BuildContext context, int index);
+
+///[PreviewGallery] widget use for [PhotoPreviewGallery] to preview all photos
 class _PreviewGallery extends StatefulWidget {
-  const _PreviewGallery({Key? key, this.previewOptions}) : super(key: key);
+  const _PreviewGallery(
+      {Key? key,
+      this.previewOptions,
+      this.builder,
+      this.itemCount,
+      this.onPageChanged,
+      this.scrollPhysics,
+      required this.photoGalleryController,
+      this.backgroundColor = Colors.black})
+      : super(key: key);
 
   @override
   _PreviewGalleryState createState() => _PreviewGalleryState();
 
   ///Preview option to build preview item
   final List<PhotoPreviewOptions>? previewOptions;
+
+  /// The count of items in the preview gallery, only used when constructed via [PreviewGalleryBuilder.builder]
+  final int? itemCount;
+
+  /// Called to build items for the preview gallery when using [PreviewGalleryBuilder.builder]
+  final PreviewGalleryBuilder? builder;
+
+  /// [ScrollPhysics] for the internal [PageView]
+  final ScrollPhysics? scrollPhysics;
+
+  /// An callback to be called on a page change
+  final PhotoViewGalleryPageChangedCallback? onPageChanged;
+
+  final PhotoGalleryController photoGalleryController;
+
+  final Color backgroundColor;
 }
 
 class _PreviewGalleryState extends State<_PreviewGallery> {
+  final AutoScrollController _autoScrollController = AutoScrollController();
+
+  int _currentPage = 0;
+
   @override
-  Widget build(BuildContext context) {
-    return Container();
+  void initState() {
+    _currentPage = widget.photoGalleryController.page;
+    WidgetsBinding.instance!.addPostFrameCallback(
+        (_) => _autoScrollController.scrollToIndex(_currentPage));
+
+    widget.photoGalleryController.addListener(() {
+      if (_currentPage != widget.photoGalleryController.page) {
+        _currentPage = widget.photoGalleryController.page;
+        _autoScrollController.scrollToIndex(_currentPage);
+      }
+    });
+    super.initState();
   }
 
-  PhotoPreviewOptions _buildPageOption(
-      BuildContext context, int index) {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: ListView.separated(
+        controller: _autoScrollController,
+        itemBuilder: _buildItem,
+        separatorBuilder: (BuildContext context, int index) {
+          return const SizedBox(width: 10);
+        },
+        itemCount: itemCount,
+        scrollDirection: Axis.horizontal,
+      ),
+    );
+  }
+
+  int get itemCount {
+    if (widget.builder != null) {
+      return widget.itemCount!;
+    }
+    return widget.previewOptions!.length;
+  }
+
+  PhotoPreviewOptions _buildPageOption(BuildContext context, int index) {
     return widget.previewOptions![index];
+  }
+
+  Widget? _buildSelectedItem() {
+    return widget.builder?.call(context, _currentPage);
   }
 
   Widget _buildItem(BuildContext context, int index) {
     final pageOption = _buildPageOption(context, index);
     final isCustomChild = pageOption.child != null;
 
-    final PhotoView photoView = isCustomChild
-        ? PhotoView.customChild(
-            key: ObjectKey(index),
-            child: pageOption.child,
-            childSize: pageOption.childSize,
-            backgroundDecoration: widget.backgroundDecoration,
-            controller: pageOption.controller,
-            scaleStateController: pageOption.scaleStateController,
-            customSize: widget.customSize,
-            heroAttributes: pageOption.heroAttributes,
-            scaleStateChangedCallback: scaleStateChangedCallback,
-            enableRotation: widget.enableRotation,
-            initialScale: pageOption.initialScale,
-            minScale: pageOption.minScale,
-            maxScale: pageOption.maxScale,
-            scaleStateCycle: pageOption.scaleStateCycle,
-            onTapUp: pageOption.onTapUp,
-            onTapDown: pageOption.onTapDown,
-            onScaleEnd: pageOption.onScaleEnd,
-            gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
-            tightMode: pageOption.tightMode,
-            filterQuality: pageOption.filterQuality,
-            basePosition: pageOption.basePosition,
-            disableGestures: pageOption.disableGestures,
-            onScaleStart: pageOption.onScaleStart,
-            onScaleUpdate: pageOption.onScaleUpdate,
-          )
-        : PhotoView(
-            key: ObjectKey(index),
-            imageProvider: pageOption.imageProvider,
-            loadingBuilder: widget.loadingBuilder,
-            backgroundDecoration: widget.backgroundDecoration,
-            controller: pageOption.controller,
-            scaleStateController: pageOption.scaleStateController,
-            customSize: widget.customSize,
-            gaplessPlayback: widget.gaplessPlayback,
-            heroAttributes: pageOption.heroAttributes,
-            scaleStateChangedCallback: scaleStateChangedCallback,
-            enableRotation: widget.enableRotation,
-            initialScale: pageOption.initialScale,
-            minScale: pageOption.minScale,
-            maxScale: pageOption.maxScale,
-            scaleStateCycle: pageOption.scaleStateCycle,
-            onTapUp: pageOption.onTapUp,
-            onTapDown: pageOption.onTapDown,
-            onScaleEnd: pageOption.onScaleEnd,
-            gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
-            tightMode: pageOption.tightMode,
-            filterQuality: pageOption.filterQuality,
-            basePosition: pageOption.basePosition,
-            disableGestures: pageOption.disableGestures,
-            errorBuilder: pageOption.errorBuilder,
-            onScaleStart: pageOption.onScaleStart,
-            onScaleUpdate: pageOption.onScaleUpdate,
+    final Widget previewPhoto = isCustomChild
+        ? pageOption.child!
+        : Container(
+            width: 100,
+            height: 100,
+            margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+            decoration: BoxDecoration(
+              // borderRadius: const BorderRadius.all(Radius.circular(8)),
+              image: DecorationImage(
+                image: pageOption.imageProvider!,
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+              ),
+            ),
           );
 
-    return ClipRect(
-      child: photoView,
+    return AutoScrollTag(
+      key: ValueKey(index),
+      index: index,
+      controller: _autoScrollController,
+      child: InkWell(
+        child: _currentPage == index
+            ? _buildSelectedItem() ?? previewPhoto
+            : previewPhoto,
+        onTap: () {
+          _currentPage = index;
+          widget.photoGalleryController.changePage(index);
+          widget.onPageChanged?.call(index);
+          _autoScrollController.scrollToIndex(
+            index,
+            duration: const Duration(milliseconds: 500),
+          );
+        },
+      ),
     );
+  }
+}
+
+class PhotoGalleryController extends ChangeNotifier {
+  PhotoGalleryController({required this.page});
+
+  int page;
+
+  void changePage(int index) {
+    page = index;
+    notifyListeners();
   }
 }
