@@ -101,7 +101,8 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
               color: Colors.black,
               height: MediaQuery.of(context).size.height,
               child: PhotoPreviewGallery.builder(
-                previewPadding: EdgeInsets.only(
+                initialPage: 2,
+                previewPadding: EdgeInsets.only(left: 10,
                     bottom: MediaQuery.of(context).padding.bottom),
                 loadingBuilder: (BuildContext context, ImageChunkEvent? event) {
                   return const Center(child: const CircularProgressIndicator());

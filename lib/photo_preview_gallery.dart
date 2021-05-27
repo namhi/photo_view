@@ -95,6 +95,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.backgroundColor = Colors.black,
     this.previewSize = const Size.fromHeight(100),
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
+    this.initialPage = 0,
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -121,6 +122,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.backgroundColor = Colors.black,
     this.previewSize = const Size.fromHeight(100),
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
+    this.initialPage = 0,
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -177,6 +179,9 @@ class PhotoPreviewGallery extends StatefulWidget {
 
   final Color backgroundColor;
 
+  ///init page of photos
+  final int initialPage;
+
   bool get _isBuilder => builder != null;
 
   @override
@@ -187,8 +192,7 @@ class PhotoPreviewGallery extends StatefulWidget {
 
 class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
     with SingleTickerProviderStateMixin {
-  late final PageController _controller =
-      widget.pageController ?? PageController();
+  late PageController _controller = widget.pageController ?? PageController();
 
   ///animation to visible or invisible preview photos when zoom
   late AnimationController _animationController;
@@ -198,13 +202,18 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
   late Animation<double> _opacityAnimation;
   late Animation<double> _sizeAnimation;
 
+  ///use to lock when scroll choose photo preview
   bool _animated = false;
 
   bool isInteger(num value) => value is int || value == value.roundToDouble();
 
   @override
   void initState() {
-    _photoGalleryController = PhotoGalleryController(page: actualPage);
+    _currentPage = widget.initialPage;
+    _controller = widget.pageController ??
+        PageController(initialPage: widget.initialPage);
+    _photoGalleryController = PhotoGalleryController(page: widget.initialPage);
+    _photoGalleryController.changePage(widget.initialPage);
     _animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
     _opacityAnimation =
@@ -215,7 +224,7 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
         CurvedAnimation(parent: _animationController, curve: Curves.linear);
     _sizeAnimation =
         Tween<double>(begin: 1.0, end: 0.0).animate(_sizeAnimation);
-    _currentPage = actualPage;
+
     _controller.addListener(() {
       if (_animated) {
         if (_controller.page == _currentPage) {
@@ -233,6 +242,11 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
 
   @override
   void dispose() {
+    if (widget.pageController == null) {
+      _controller.dispose();
+    }
+    _animationController.dispose();
+    _photoGalleryController.dispose();
     super.dispose();
   }
 
@@ -546,16 +560,21 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
   @override
   void initState() {
     _currentPage = widget.photoGalleryController.page;
-    WidgetsBinding.instance!.addPostFrameCallback(
-        (_) => _autoScrollController.scrollToIndex(_currentPage));
+    WidgetsBinding.instance!
+        .addPostFrameCallback((_) => _autoScrollController.scrollToIndex(
+              _currentPage,
+              duration: const Duration(milliseconds: 500),
+            ));
 
     widget.photoGalleryController.addListener(() {
       if (_currentPage != widget.photoGalleryController.page) {
         setState(() {
           _currentPage = widget.photoGalleryController.page;
         });
-
-        _autoScrollController.scrollToIndex(_currentPage);
+        _autoScrollController.scrollToIndex(
+          _currentPage,
+          duration: const Duration(milliseconds: 500),
+        );
       }
     });
     super.initState();
