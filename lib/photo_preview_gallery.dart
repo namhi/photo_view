@@ -93,8 +93,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
-    this.previewSize,
-    this.previewPadding,
+    this.previewSize = const Size.fromHeight(100),
+    this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -119,8 +119,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
-    this.previewSize,
-    this.previewPadding,
+    this.previewSize = const Size.fromHeight(100),
+    this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -168,9 +168,9 @@ class PhotoPreviewGallery extends StatefulWidget {
   /// Mirror to [PhotoView.customSize]
   final Size? customSize;
 
-  final Size? previewSize;
+  final Size previewSize;
 
-  final EdgeInsets? previewPadding;
+  final EdgeInsets previewPadding;
 
   /// The axis along which the [PageView] scrolls. Mirror to [PageView.scrollDirection]
   final Axis scrollDirection;
@@ -279,11 +279,13 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             sizeFactor: _sizeAnimation,
             child: FadeTransition(
               opacity: _opacityAnimation,
-              child: Container(
-                height: widget.previewSize?.height ?? 100,
-                width: widget.previewSize?.width ?? double.infinity,
-                margin: widget.previewPadding,
-                child: _buildPreviewPhotos(),
+              child: Padding(
+                padding: widget.previewPadding,
+                child: Container(
+                  height: widget.previewSize.height,
+                  width: widget.previewSize.width,
+                  child: _buildPreviewPhotos(),
+                ),
               ),
             ),
           ),
