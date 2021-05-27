@@ -96,6 +96,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.previewSize = const Size.fromHeight(100),
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
     this.initialPage = 0,
+    this.animationDuration = const Duration(milliseconds: 200),
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -123,6 +124,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.previewSize = const Size.fromHeight(100),
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
     this.initialPage = 0,
+    this.animationDuration = const Duration(milliseconds: 200),
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -182,6 +184,8 @@ class PhotoPreviewGallery extends StatefulWidget {
   ///init page of photos
   final int initialPage;
 
+  final Duration animationDuration;
+
   bool get _isBuilder => builder != null;
 
   @override
@@ -214,8 +218,8 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
         PageController(initialPage: widget.initialPage);
     _photoGalleryController = PhotoGalleryController(page: widget.initialPage);
     _photoGalleryController.changePage(widget.initialPage);
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+    _animationController =
+        AnimationController(vsync: this, duration: widget.animationDuration);
     _opacityAnimation =
         CurvedAnimation(parent: _animationController, curve: Curves.linear);
     _opacityAnimation =
@@ -527,6 +531,7 @@ class _PreviewGallery extends StatefulWidget {
     this.scrollPhysics,
     required this.photoGalleryController,
     this.backgroundColor = Colors.black,
+    this.animationDuration = const Duration(milliseconds: 200),
   }) : super(key: key);
 
   @override
@@ -550,6 +555,8 @@ class _PreviewGallery extends StatefulWidget {
   final PhotoGalleryController photoGalleryController;
 
   final Color backgroundColor;
+
+  final Duration animationDuration;
 }
 
 class _PreviewGalleryState extends State<_PreviewGallery> {
@@ -563,7 +570,7 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
     WidgetsBinding.instance!
         .addPostFrameCallback((_) => _autoScrollController.scrollToIndex(
               _currentPage,
-              duration: const Duration(milliseconds: 500),
+              duration: widget.animationDuration,
             ));
 
     widget.photoGalleryController.addListener(() {
@@ -573,7 +580,7 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
         });
         _autoScrollController.scrollToIndex(
           _currentPage,
-          duration: const Duration(milliseconds: 500),
+          duration: widget.animationDuration,
         );
       }
     });
@@ -649,7 +656,7 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
           widget.onPageChanged?.call(index);
           _autoScrollController.scrollToIndex(
             index,
-            duration: const Duration(milliseconds: 500),
+            duration: widget.animationDuration,
           );
         },
       ),
