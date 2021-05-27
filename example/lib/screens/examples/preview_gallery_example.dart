@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -21,11 +22,92 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
           return Dialog(
               insetPadding: EdgeInsets.zero,
               child: Container(
+                color: Colors.black,
                 height: MediaQuery.of(context).size.height,
                 child: PhotoPreviewGallery.builder(
                   builder: (BuildContext context, int index) {
                     return PhotoViewGalleryPageOptions(
                       imageProvider: NetworkImage(_imageUrls[index]),
+                      minScale: PhotoViewComputedScale.contained,
+                      initialScale: PhotoViewComputedScale.contained,
+                    );
+                  },
+                  previewOptions: _imageUrls
+                      .asMap()
+                      .entries
+                      .map((e) => PhotoPreviewOptions.customBuilder(
+                            selectedBuilder: (BuildContext context, int index) {
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                  border: Border.all(color: Colors.white),
+                                  image: DecorationImage(
+                                      image: NetworkImage(_imageUrls[index]),
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center),
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
+                            builder: (BuildContext context, int index) {
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        // border: Border.all(color: Colors.white),
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(_imageUrls[index]),
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment.center),
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        color: Colors.black.withAlpha(150),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ))
+                      .toList(),
+                  itemCount: _imageUrls.length,
+                ),
+              ));
+        },
+      );
+
+  void openDialogCacheImage(BuildContext context) => showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+              insetPadding: EdgeInsets.zero,
+              child: Container(
+                color: Colors.black,
+                height: MediaQuery.of(context).size.height,
+                child: PhotoPreviewGallery.builder(
+                  loadingBuilder:
+                      (BuildContext context, ImageChunkEvent? event) {
+                    return const Center(
+                        child: const CircularProgressIndicator());
+                  },
+                  builder: (BuildContext context, int index) {
+                    return PhotoViewGalleryPageOptions(
+                      imageProvider:
+                          CachedNetworkImageProvider(_imageUrls[index]),
                       minScale: PhotoViewComputedScale.contained,
                       initialScale: PhotoViewComputedScale.contained,
                     );
@@ -145,6 +227,11 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
             ),
             const Divider(),
             ElevatedButton(
+              child: const Text("Dialog cache image network"),
+              onPressed: () => openDialogCacheImage(context),
+            ),
+            const Divider(),
+            ElevatedButton(
               child: const Text("Bottom sheet"),
               onPressed: () => openBottomSheet(context),
             ),
@@ -156,6 +243,33 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ImageWidgetPlaceholder extends StatelessWidget {
+  const ImageWidgetPlaceholder({
+    Key? key,
+    required this.image,
+    required this.placeholder,
+  }) : super(key: key);
+  final ImageProvider image;
+  final Widget placeholder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: image,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) {
+          return child;
+        } else {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: frame != null ? child : placeholder,
+          );
+        }
+      },
     );
   }
 }
