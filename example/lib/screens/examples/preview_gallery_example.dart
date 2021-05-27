@@ -19,27 +19,72 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
         context: context,
         builder: (BuildContext context) {
           return Dialog(
-            insetPadding: EdgeInsets.zero,
+              insetPadding: EdgeInsets.zero,
               child: Container(
-            height: MediaQuery.of(context).size.height,
-            child: PhotoPreviewGallery.builder(
-
-              // pageOptions: [],
-              builder: (BuildContext context, int index) {
-                return PhotoViewGalleryPageOptions(
-                    imageProvider: NetworkImage(_imageUrls[index]));
-              },
-              previewOptions: _imageUrls
-                  .asMap()
-                  .entries
-                  .map((e) => PhotoPreviewOptions(
-                        imageProvider: NetworkImage(_imageUrls[e.key]),
-
-                      ))
-                  .toList(),
-              itemCount: _imageUrls.length,
-            ),
-          ));
+                height: MediaQuery.of(context).size.height,
+                child: PhotoPreviewGallery.builder(
+                  builder: (BuildContext context, int index) {
+                    return PhotoViewGalleryPageOptions(
+                      imageProvider: NetworkImage(_imageUrls[index]),
+                      minScale: PhotoViewComputedScale.contained,
+                      initialScale: PhotoViewComputedScale.contained,
+                    );
+                  },
+                  previewOptions: _imageUrls
+                      .asMap()
+                      .entries
+                      .map((e) => PhotoPreviewOptions.customBuilder(
+                            selectedBuilder: (BuildContext context, int index) {
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                  border: Border.all(color: Colors.white),
+                                  image: DecorationImage(
+                                      image: NetworkImage(_imageUrls[index]),
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center),
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
+                            builder: (BuildContext context, int index) {
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        // border: Border.all(color: Colors.white),
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(_imageUrls[index]),
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment.center),
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        color: Colors.black.withAlpha(150),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ))
+                      .toList(),
+                  itemCount: _imageUrls.length,
+                ),
+              ));
         },
       );
 

@@ -100,24 +100,24 @@ class PhotoPreviewGallery extends StatefulWidget {
   /// Construct a gallery with dynamic items.
   ///
   /// The builder must return a [PhotoViewGalleryPageOptions].
-  const PhotoPreviewGallery.builder(
-      {Key? key,
-      required this.itemCount,
-      required this.builder,
-      this.loadingBuilder,
-      this.backgroundDecoration,
-      this.gaplessPlayback = false,
-      this.reverse = false,
-      this.pageController,
-      this.onPageChanged,
-      this.scaleStateChangedCallback,
-      this.enableRotation = false,
-      this.scrollPhysics,
-      this.scrollDirection = Axis.horizontal,
-      this.customSize,
-      this.previewOptions,
-      this.backgroundColor = Colors.black})
-      : pageOptions = null,
+  const PhotoPreviewGallery.builder({
+    Key? key,
+    required this.itemCount,
+    required this.builder,
+    this.loadingBuilder,
+    this.backgroundDecoration,
+    this.gaplessPlayback = false,
+    this.reverse = false,
+    this.pageController,
+    this.onPageChanged,
+    this.scaleStateChangedCallback,
+    this.enableRotation = false,
+    this.scrollPhysics,
+    this.scrollDirection = Axis.horizontal,
+    this.customSize,
+    this.previewOptions,
+    this.backgroundColor = Colors.black,
+  })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
         super(key: key);
@@ -190,6 +190,10 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
   late Animation<double> _opacityAnimation;
   late Animation<double> _sizeAnimation;
 
+  bool _animated = false;
+
+  bool isInteger(num value) => value is int || value == value.roundToDouble();
+
   @override
   void initState() {
     _photoGalleryController = PhotoGalleryController(page: actualPage);
@@ -200,10 +204,22 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
     _opacityAnimation =
         Tween<double>(begin: 1.0, end: 0.0).animate(_opacityAnimation);
     _sizeAnimation =
-        CurvedAnimation(parent: _animationController, curve: Curves.elasticOut);
+        CurvedAnimation(parent: _animationController, curve: Curves.linear);
     _sizeAnimation =
         Tween<double>(begin: 1.0, end: 0.0).animate(_sizeAnimation);
     _currentPage = actualPage;
+    _controller.addListener(() {
+      if (_animated) {
+        if (_controller.page == _currentPage) {
+          _animated = false;
+        }
+      } else {
+        if (isInteger(_controller.page ?? actualPage)) {
+          _currentPage = actualPage;
+          _photoGalleryController.changePage(actualPage);
+        }
+      }
+    });
     super.initState();
   }
 
@@ -233,51 +249,39 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: PhotoViewGestureDetectorScope(
-            axis: widget.scrollDirection,
-            child: PageView.builder(
-              reverse: widget.reverse,
-              controller: _controller,
-              onPageChanged: (int page) {
-                if (_currentPage != page) {
-                  _currentPage = page;
-                  _photoGalleryController.changePage(page);
-                  widget.onPageChanged?.call(page);
-                }
-              },
-              itemCount: itemCount,
-              itemBuilder: _buildItem,
-              scrollDirection: widget.scrollDirection,
-              physics: widget.scrollPhysics,
+    return Container(
+      color: widget.backgroundColor,
+      child: Column(
+        children: [
+          Expanded(
+            child: PhotoViewGestureDetectorScope(
+              axis: widget.scrollDirection,
+              child: PageView.builder(
+                reverse: widget.reverse,
+                controller: _controller,
+                onPageChanged: widget.onPageChanged,
+                itemCount: itemCount,
+                itemBuilder: _buildItem,
+                scrollDirection: widget.scrollDirection,
+                physics: widget.scrollPhysics,
+              ),
             ),
           ),
-        ),
-        SizeTransition(
-          sizeFactor: _sizeAnimation,
-          child: FadeTransition(
-            opacity: _opacityAnimation,
-            child: Container(
-              height: 100,
-              child: _buildPreviewPhotos(),
+          SizeTransition(
+            sizeFactor: _sizeAnimation,
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: Container(
+                height: 100,
+                margin: const EdgeInsets.only(bottom: 10),
+                child: _buildPreviewPhotos(),
+              ),
             ),
           ),
-        ),
-        // if (!_animationController.isCompleted)
-        //   FadeTransition(
-        //     opacity: _opacityAnimation,
-        //     child: Container(
-        //       height: 100,
-        //       child: _buildPreviewPhotos(),
-        //     ),
-        //   ),
-      ],
+        ],
+      ),
     );
   }
-
-  double _scale = 1;
 
   Widget _buildItem(BuildContext context, int index) {
     final pageOption = _buildPageOption(context, index);
@@ -299,7 +303,17 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             minScale: pageOption.minScale,
             maxScale: pageOption.maxScale,
             scaleStateCycle: pageOption.scaleStateCycle,
-            onTapUp: pageOption.onTapUp,
+            onTapUp: (
+              BuildContext context,
+              TapUpDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              pageOption.onTapUp?.call(context, details, controllerValue);
+              if (_animationController.isCompleted ||
+                  _animationController.isAnimating) {
+                _animationController.reverse();
+              }
+            },
             onTapDown: pageOption.onTapDown,
             gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
             tightMode: pageOption.tightMode,
@@ -308,15 +322,11 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             disableGestures: pageOption.disableGestures,
             onScaleStart: (BuildContext context, ScaleStartDetails details,
                 PhotoViewControllerValue controllerValue) {
-              if (_animationController.isCompleted ||
-                  _animationController.isAnimating) {
-                return;
-              }
-
-              ///start hide preview photos
-              _animationController.forward();
-
               pageOption.onScaleStart?.call(context, details, controllerValue);
+              if (!(_animationController.isCompleted ||
+                  _animationController.isAnimating)) {
+                _animationController.forward();
+              }
             },
             onScaleUpdate: pageOption.onScaleUpdate,
             onScaleEnd: (
@@ -327,7 +337,6 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
               pageOption.onScaleEnd?.call(context, details, controllerValue);
               if (_animationController.isCompleted ||
                   _animationController.isAnimating) {
-                ///start show preview photos
                 _animationController.reverse();
               }
             },
@@ -348,7 +357,17 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             minScale: pageOption.minScale,
             maxScale: pageOption.maxScale,
             scaleStateCycle: pageOption.scaleStateCycle,
-            onTapUp: pageOption.onTapUp,
+            onTapUp: (
+              BuildContext context,
+              TapUpDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              pageOption.onTapUp?.call(context, details, controllerValue);
+              if (_animationController.isCompleted ||
+                  _animationController.isAnimating) {
+                _animationController.reverse();
+              }
+            },
             onTapDown: pageOption.onTapDown,
             gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
             tightMode: pageOption.tightMode,
@@ -359,24 +378,16 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             onScaleStart: (BuildContext context, ScaleStartDetails details,
                 PhotoViewControllerValue controllerValue) {
               pageOption.onScaleStart?.call(context, details, controllerValue);
-              // _scale = controllerValue.scale?? 1;
-              //
-              // print(_scale);
-              // if (!(_animationController.isCompleted ||
-              //     _animationController.isAnimating)) {
-              //   ///start hide preview photos
-              //
-              //   Future.delayed(const Duration(milliseconds: 500), () {
-              //     _animationController.forward();
-              //   });
-              // }
+              if (!(_animationController.isCompleted ||
+                  _animationController.isAnimating)) {
+                _animationController.forward();
+              }
             },
             onScaleUpdate: (
               BuildContext context,
               ScaleUpdateDetails details,
               PhotoViewControllerValue controllerValue,
             ) {
-              print(details.scale);
               pageOption.onScaleUpdate?.call(context, details, controllerValue);
             },
             onScaleEnd: (
@@ -385,15 +396,6 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
               PhotoViewControllerValue controllerValue,
             ) {
               pageOption.onScaleEnd?.call(context, details, controllerValue);
-
-              // if (_animationController.isCompleted ||
-              //     _animationController.isAnimating) {
-              //   ///start show preview photos
-              //
-              //   Future.delayed(const Duration(milliseconds: 500), () {
-              //     _animationController.reverse();
-              //   });
-              // }
             },
           );
 
@@ -409,9 +411,9 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
       photoGalleryController: _photoGalleryController,
       backgroundColor: widget.backgroundColor,
       onPageChanged: (int page) {
-        print(page);
         _currentPage = _photoGalleryController.page;
         widget.onPageChanged?.call(_photoGalleryController.page);
+        _photoGalleryController.changePage(page);
         _controller.animateToPage(page,
             duration: const Duration(milliseconds: 500), curve: Curves.linear);
       },
@@ -432,35 +434,36 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
 /// The [maxScale], [minScale] and [initialScale] options may be [double] or a [PhotoViewComputedScale] constant
 ///
 class PhotoPreviewOptions {
-  PhotoPreviewOptions(
-      {Key? key,
-      required this.imageProvider,
-      this.gestureDetectorBehavior,
-      this.tightMode,
-      this.disableGestures,
-      this.errorBuilder,
-      this.onPressed,
-      this.selectedBuilder})
-      : child = null,
+  PhotoPreviewOptions({
+    Key? key,
+    required this.imageProvider,
+    this.gestureDetectorBehavior,
+    this.tightMode,
+    this.disableGestures,
+    this.errorBuilder,
+    this.onPressed,
+    this.selectedBuilder,
+  })  : builder = null,
         childSize = null,
         assert(imageProvider != null);
 
-  PhotoPreviewOptions.customChild(
-      {required this.child,
-      this.gestureDetectorBehavior,
-      this.tightMode,
-      this.disableGestures,
-      this.onPressed,
-      this.childSize,
-      this.selectedBuilder})
-      : errorBuilder = null,
+  PhotoPreviewOptions.customBuilder({
+    required this.builder,
+    this.gestureDetectorBehavior,
+    this.tightMode,
+    this.disableGestures,
+    this.onPressed,
+    this.childSize,
+    this.selectedBuilder,
+  })  : errorBuilder = null,
         imageProvider = null;
 
   /// Mirror to [PhotoView.imageProvider]
   final ImageProvider? imageProvider;
 
-  final Widget? child;
   final PreviewGalleryBuilder? selectedBuilder;
+
+  final PreviewGalleryBuilder? builder;
 
   final Size? childSize;
 
@@ -489,16 +492,16 @@ typedef PreviewGalleryBuilder = Widget Function(
 
 ///[PreviewGallery] widget use for [PhotoPreviewGallery] to preview all photos
 class _PreviewGallery extends StatefulWidget {
-  const _PreviewGallery(
-      {Key? key,
-      this.previewOptions,
-      this.builder,
-      this.itemCount,
-      this.onPageChanged,
-      this.scrollPhysics,
-      required this.photoGalleryController,
-      this.backgroundColor = Colors.black})
-      : super(key: key);
+  const _PreviewGallery({
+    Key? key,
+    this.previewOptions,
+    this.builder,
+    this.itemCount,
+    this.onPageChanged,
+    this.scrollPhysics,
+    required this.photoGalleryController,
+    this.backgroundColor = Colors.black,
+  }) : super(key: key);
 
   @override
   _PreviewGalleryState createState() => _PreviewGalleryState();
@@ -536,7 +539,10 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
 
     widget.photoGalleryController.addListener(() {
       if (_currentPage != widget.photoGalleryController.page) {
-        _currentPage = widget.photoGalleryController.page;
+        setState(() {
+          _currentPage = widget.photoGalleryController.page;
+        });
+
         _autoScrollController.scrollToIndex(_currentPage);
       }
     });
@@ -571,24 +577,25 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
   }
 
   Widget? _buildSelectedItem() {
-    return widget.builder?.call(context, _currentPage);
+    return widget.previewOptions?[_currentPage].selectedBuilder
+        ?.call(context, _currentPage);
   }
 
   Widget _buildItem(BuildContext context, int index) {
     final pageOption = _buildPageOption(context, index);
-    final isCustomChild = pageOption.child != null;
+    final isCustomChild = pageOption.builder != null;
 
     final Widget previewPhoto = isCustomChild
-        ? pageOption.child!
+        ? pageOption.builder!(context, index)
         : Container(
-            width: 100,
-            height: 100,
+            width: widget.previewOptions?[index].childSize?.width ?? 100,
+            height: widget.previewOptions?[index].childSize?.width ?? 100,
             margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
             decoration: BoxDecoration(
-              // borderRadius: const BorderRadius.all(Radius.circular(8)),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
               image: DecorationImage(
                 image: pageOption.imageProvider!,
-                fit: BoxFit.scaleDown,
+                fit: BoxFit.cover,
                 alignment: Alignment.center,
               ),
             ),
@@ -603,7 +610,10 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
             ? _buildSelectedItem() ?? previewPhoto
             : previewPhoto,
         onTap: () {
-          _currentPage = index;
+          setState(() {
+            _currentPage = index;
+          });
+
           widget.photoGalleryController.changePage(index);
           widget.onPageChanged?.call(index);
           _autoScrollController.scrollToIndex(
