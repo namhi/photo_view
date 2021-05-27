@@ -91,6 +91,89 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
         },
       );
 
+  void openCustomDialog(BuildContext context) {
+    showCustomDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+            insetPadding: EdgeInsets.zero,
+            child: Container(
+              color: Colors.black,
+              height: MediaQuery.of(context).size.height,
+              child: PhotoPreviewGallery.builder(
+                previewPadding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom),
+                loadingBuilder: (BuildContext context, ImageChunkEvent? event) {
+                  return const Center(child: const CircularProgressIndicator());
+                },
+                builder: (BuildContext context, int index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider:
+                        CachedNetworkImageProvider(_imageUrls[index]),
+                    minScale: PhotoViewComputedScale.contained,
+                    initialScale: PhotoViewComputedScale.contained,
+                  );
+                },
+                previewOptions: _imageUrls
+                    .asMap()
+                    .entries
+                    .map((e) => PhotoPreviewOptions.customBuilder(
+                          selectedBuilder: (BuildContext context, int index) {
+                            return Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
+                                border: Border.all(color: Colors.white),
+                                image: DecorationImage(
+                                    image: NetworkImage(_imageUrls[index]),
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.center),
+                                color: Colors.white,
+                              ),
+                            );
+                          },
+                          builder: (BuildContext context, int index) {
+                            return Container(
+                              width: 100,
+                              height: 100,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(8)),
+                                      // border: Border.all(color: Colors.white),
+                                      image: DecorationImage(
+                                          image:
+                                              NetworkImage(_imageUrls[index]),
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.center),
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(8)),
+                                      color: Colors.black.withAlpha(150),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        ))
+                    .toList(),
+                itemCount: _imageUrls.length,
+              ),
+            ));
+      },
+      useRootNavigator: false,
+    );
+  }
+
   void openDialogCacheImage(BuildContext context) => showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -229,7 +312,7 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
             const Divider(),
             ElevatedButton(
               child: const Text("Dialog cache image network"),
-              onPressed: () => openDialogCacheImage(context),
+              onPressed: () => openCustomDialog(context),
             ),
             const Divider(),
             ElevatedButton(
@@ -273,4 +356,45 @@ class ImageWidgetPlaceholder extends StatelessWidget {
       },
     );
   }
+}
+
+Future<T?> showCustomDialog<T>({
+  required BuildContext context,
+  bool barrierDismissible = true,
+  required WidgetBuilder builder,
+  bool useRootNavigator = true,
+  RouteSettings? routeSettings,
+}) {
+  final ThemeData theme = Theme.of(context);
+  return showGeneralDialog<T?>(
+    context: context,
+    pageBuilder: (BuildContext buildContext, Animation<double> animation,
+        Animation<double> secondaryAnimation) {
+      final Widget pageChild = Builder(builder: builder);
+      return Builder(builder: (BuildContext context) {
+        return theme != null ? Theme(data: theme, child: pageChild) : pageChild;
+      });
+    },
+    barrierDismissible: barrierDismissible,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 150),
+    transitionBuilder: _buildMaterialDialogTransitions,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+  );
+}
+
+Widget _buildMaterialDialogTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child) {
+  return FadeTransition(
+    opacity: CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    ),
+    child: child,
+  );
 }

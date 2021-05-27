@@ -93,8 +93,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
-    this.previewSize = const Size.fromHeight(100),
-    this.previewPadding = const EdgeInsets.only(bottom: 10),
+    this.previewSize,
+    this.previewPadding,
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -119,8 +119,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
-    this.previewSize = const Size.fromHeight(100),
-    this.previewPadding = const EdgeInsets.only(bottom: 10),
+    this.previewSize,
+    this.previewPadding,
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -168,9 +168,9 @@ class PhotoPreviewGallery extends StatefulWidget {
   /// Mirror to [PhotoView.customSize]
   final Size? customSize;
 
-  final Size previewSize;
+  final Size? previewSize;
 
-  final EdgeInsets previewPadding;
+  final EdgeInsets? previewPadding;
 
   /// The axis along which the [PageView] scrolls. Mirror to [PageView.scrollDirection]
   final Axis scrollDirection;
@@ -280,8 +280,8 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             child: FadeTransition(
               opacity: _opacityAnimation,
               child: Container(
-                height: widget.previewSize.height,
-                width: widget.previewSize.width,
+                height: widget.previewSize?.height ?? 100,
+                width: widget.previewSize?.width ?? double.infinity,
                 margin: widget.previewPadding,
                 child: _buildPreviewPhotos(),
               ),
@@ -598,20 +598,15 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
     final Widget previewPhoto = isCustomChild
         ? pageOption.builder!(context, index)
         : Container(
-            color: widget.backgroundColor,
-            child: SafeArea(
-              child: Container(
-                width: widget.previewOptions?[index].childSize?.width ?? 100,
-                height: widget.previewOptions?[index].childSize?.width ?? 100,
-                margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  image: DecorationImage(
-                    image: pageOption.imageProvider!,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                  ),
-                ),
+            width: widget.previewOptions?[index].childSize?.width ?? 100,
+            height: widget.previewOptions?[index].childSize?.width ?? 100,
+            margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              image: DecorationImage(
+                image: pageOption.imageProvider!,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
             ),
           );
