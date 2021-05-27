@@ -93,6 +93,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
+    this.previewSize = const Size.fromHeight(100),
+    this.previewPadding = const EdgeInsets.only(bottom: 10),
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -117,6 +119,8 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.customSize,
     this.previewOptions,
     this.backgroundColor = Colors.black,
+    this.previewSize = const Size.fromHeight(100),
+    this.previewPadding = const EdgeInsets.only(bottom: 10),
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -163,6 +167,10 @@ class PhotoPreviewGallery extends StatefulWidget {
 
   /// Mirror to [PhotoView.customSize]
   final Size? customSize;
+
+  final Size previewSize;
+
+  final EdgeInsets previewPadding;
 
   /// The axis along which the [PageView] scrolls. Mirror to [PageView.scrollDirection]
   final Axis scrollDirection;
@@ -272,8 +280,9 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
             child: FadeTransition(
               opacity: _opacityAnimation,
               child: Container(
-                height: 100,
-                margin: const EdgeInsets.only(bottom: 10),
+                height: widget.previewSize.height,
+                width: widget.previewSize.width,
+                margin: widget.previewPadding,
                 child: _buildPreviewPhotos(),
               ),
             ),
@@ -411,6 +420,7 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
       photoGalleryController: _photoGalleryController,
       backgroundColor: widget.backgroundColor,
       onPageChanged: (int page) {
+        _animated = true;
         _currentPage = _photoGalleryController.page;
         widget.onPageChanged?.call(_photoGalleryController.page);
         _photoGalleryController.changePage(page);
@@ -588,15 +598,20 @@ class _PreviewGalleryState extends State<_PreviewGallery> {
     final Widget previewPhoto = isCustomChild
         ? pageOption.builder!(context, index)
         : Container(
-            width: widget.previewOptions?[index].childSize?.width ?? 100,
-            height: widget.previewOptions?[index].childSize?.width ?? 100,
-            margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              image: DecorationImage(
-                image: pageOption.imageProvider!,
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
+            color: widget.backgroundColor,
+            child: SafeArea(
+              child: Container(
+                width: widget.previewOptions?[index].childSize?.width ?? 100,
+                height: widget.previewOptions?[index].childSize?.width ?? 100,
+                margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  image: DecorationImage(
+                    image: pageOption.imageProvider!,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                  ),
+                ),
               ),
             ),
           );
