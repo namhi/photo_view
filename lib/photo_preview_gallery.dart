@@ -439,13 +439,14 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
       previewOptions: widget.previewOptions,
       photoGalleryController: _photoGalleryController,
       backgroundColor: widget.backgroundColor,
+      animationDuration: widget.animationDuration,
       onPageChanged: (int page) {
         _animated = true;
         _currentPage = _photoGalleryController.page;
         widget.onPageChanged?.call(_photoGalleryController.page);
         _photoGalleryController.changePage(page);
         _controller.animateToPage(page,
-            duration: const Duration(milliseconds: 500), curve: Curves.linear);
+            duration: widget.animationDuration, curve: Curves.linear);
       },
     );
   }
