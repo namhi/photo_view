@@ -1,5 +1,6 @@
 library photo_view;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/src/controller/photo_view_controller.dart';
 import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
@@ -258,6 +259,7 @@ class PhotoView extends StatefulWidget {
     this.errorBuilder,
     this.onScaleStart,
     this.onScaleUpdate,
+    this.onDoubleTap,
   })  : child = null,
         childSize = null,
         super(key: key);
@@ -293,6 +295,7 @@ class PhotoView extends StatefulWidget {
     this.disableGestures,
     this.onScaleStart,
     this.onScaleUpdate,
+    this.onDoubleTap,
   })  : errorBuilder = null,
         imageProvider = null,
         gaplessPlayback = false,
@@ -394,6 +397,8 @@ class PhotoView extends StatefulWidget {
 
   /// Quality levels for image filters.
   final FilterQuality? filterQuality;
+
+  final GestureDoubleTapCallback? onDoubleTap;
 
   // Removes gesture detector if `true`.
   // Useful when custom gesture detector is used in child widget.
@@ -516,8 +521,9 @@ class _PhotoViewState extends State<PhotoView> {
                 tightMode: widget.tightMode,
                 filterQuality: widget.filterQuality,
                 disableGestures: widget.disableGestures,
-          onScaleStart: widget.onScaleStart,
-          onScaleUpdate: widget.onScaleUpdate,
+                onScaleStart: widget.onScaleStart,
+                onScaleUpdate: widget.onScaleUpdate,
+                onDoubleTap: widget.onDoubleTap,
               )
             : ImageWrapper(
                 imageProvider: widget.imageProvider!,
@@ -543,8 +549,9 @@ class _PhotoViewState extends State<PhotoView> {
                 filterQuality: widget.filterQuality,
                 disableGestures: widget.disableGestures,
                 errorBuilder: widget.errorBuilder,
-          onScaleStart: widget.onScaleStart,
-          onScaleUpdate: widget.onScaleUpdate,
+                onScaleStart: widget.onScaleStart,
+                onScaleUpdate: widget.onScaleUpdate,
+                onDoubleTap: widget.onDoubleTap,
               );
       },
     );

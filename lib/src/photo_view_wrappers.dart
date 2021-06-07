@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import '../photo_view.dart';
@@ -33,6 +34,7 @@ class ImageWrapper extends StatefulWidget {
     required this.errorBuilder,
     this.onScaleStart,
     this.onScaleUpdate,
+    this.onDoubleTap,
   }) : super(key: key);
 
   final ImageProvider imageProvider;
@@ -62,7 +64,7 @@ class ImageWrapper extends StatefulWidget {
   final bool? tightMode;
   final FilterQuality? filterQuality;
   final bool? disableGestures;
-
+  final GestureDoubleTapCallback? onDoubleTap;
   @override
   _ImageWrapperState createState() => _ImageWrapperState();
 }
@@ -176,6 +178,7 @@ class _ImageWrapperState extends State<ImageWrapper> {
     );
 
     return PhotoViewCore(
+      onDoubleTap: widget.onDoubleTap,
       imageProvider: widget.imageProvider,
       backgroundDecoration: widget.backgroundDecoration,
       gaplessPlayback: widget.gaplessPlayback,
@@ -208,9 +211,7 @@ class _ImageWrapperState extends State<ImageWrapper> {
     );
   }
 
-  Widget _buildError(
-    BuildContext context,
-  ) {
+  Widget _buildError(BuildContext context,) {
     if (widget.errorBuilder != null) {
       return widget.errorBuilder!(context, _lastException!, _stackTrace);
     }
@@ -221,31 +222,30 @@ class _ImageWrapperState extends State<ImageWrapper> {
 }
 
 class CustomChildWrapper extends StatelessWidget {
-  const CustomChildWrapper(
-      {Key? key,
-      this.child,
-      required this.childSize,
-      required this.backgroundDecoration,
-      this.heroAttributes,
-      this.scaleStateChangedCallback,
-      required this.enableRotation,
-      required this.controller,
-      required this.scaleStateController,
-      required this.maxScale,
-      required this.minScale,
-      required this.initialScale,
-      required this.basePosition,
-      required this.scaleStateCycle,
-      this.onTapUp,
-      this.onTapDown,
-      this.onScaleEnd,
-      required this.outerSize,
-      this.gestureDetectorBehavior,
-      required this.tightMode,
-      required this.filterQuality,
-      required this.disableGestures,
-      this.onScaleUpdate,
-      this.onScaleStart})
+  const CustomChildWrapper({Key? key,
+    this.child,
+    required this.childSize,
+    required this.backgroundDecoration,
+    this.heroAttributes,
+    this.scaleStateChangedCallback,
+    required this.enableRotation,
+    required this.controller,
+    required this.scaleStateController,
+    required this.maxScale,
+    required this.minScale,
+    required this.initialScale,
+    required this.basePosition,
+    required this.scaleStateCycle,
+    this.onTapUp,
+    this.onTapDown,
+    this.onScaleEnd,
+    required this.outerSize,
+    this.gestureDetectorBehavior,
+    required this.tightMode,
+    required this.filterQuality,
+    required this.disableGestures,
+    this.onScaleUpdate,
+    this.onScaleStart, this.onDoubleTap,})
       : super(key: key);
 
   final Widget? child;
@@ -274,6 +274,7 @@ class CustomChildWrapper extends StatelessWidget {
   final bool? tightMode;
   final FilterQuality? filterQuality;
   final bool? disableGestures;
+  final GestureDoubleTapCallback? onDoubleTap;
 
   @override
   Widget build(BuildContext context) {
@@ -304,6 +305,7 @@ class CustomChildWrapper extends StatelessWidget {
       disableGestures: disableGestures ?? false,
       onScaleStart: onScaleStart,
       onScaleUpdate: onScaleUpdate,
+      onDoubleTap: onDoubleTap,
     );
   }
 }

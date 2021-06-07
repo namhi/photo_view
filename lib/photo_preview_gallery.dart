@@ -97,6 +97,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
     this.initialPage = 0,
     this.animationDuration = const Duration(milliseconds: 200),
+    this.onDoubleTap,
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -125,6 +126,7 @@ class PhotoPreviewGallery extends StatefulWidget {
     this.previewPadding = const EdgeInsets.only(left: 10, bottom: 10),
     this.initialPage = 0,
     this.animationDuration = const Duration(milliseconds: 200),
+    this.onDoubleTap,
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -184,7 +186,11 @@ class PhotoPreviewGallery extends StatefulWidget {
   ///init page of photos
   final int initialPage;
 
+  ///animation transition photo page duration
   final Duration animationDuration;
+
+  ///call back when double click to photo view
+  final GestureDoubleTapCallback? onDoubleTap;
 
   bool get _isBuilder => builder != null;
 
@@ -236,6 +242,7 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
         }
       } else {
         if (isInteger(_controller.page ?? actualPage)) {
+          _animationController.reverse();
           _currentPage = actualPage;
           _photoGalleryController.changePage(actualPage);
         }
@@ -338,9 +345,12 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
               PhotoViewControllerValue controllerValue,
             ) {
               pageOption.onTapUp?.call(context, details, controllerValue);
-              if (_animationController.isCompleted ||
-                  _animationController.isAnimating) {
-                _animationController.reverse();
+              _animationController.reverse();
+            },
+            onDoubleTap: () {
+              if (!(_animationController.isCompleted ||
+                  _animationController.isAnimating)) {
+                _animationController.forward();
               }
             },
             onTapDown: pageOption.onTapDown,
@@ -357,7 +367,13 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
                 _animationController.forward();
               }
             },
-            onScaleUpdate: pageOption.onScaleUpdate,
+            onScaleUpdate: (
+              BuildContext context,
+              ScaleUpdateDetails details,
+              PhotoViewControllerValue controllerValue,
+            ) {
+              pageOption.onScaleUpdate?.call(context, details, controllerValue);
+            },
             onScaleEnd: (
               BuildContext context,
               ScaleEndDetails details,
@@ -392,10 +408,7 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
               PhotoViewControllerValue controllerValue,
             ) {
               pageOption.onTapUp?.call(context, details, controllerValue);
-              if (_animationController.isCompleted ||
-                  _animationController.isAnimating) {
-                _animationController.reverse();
-              }
+              _animationController.reverse();
             },
             onTapDown: pageOption.onTapDown,
             gestureDetectorBehavior: pageOption.gestureDetectorBehavior,
@@ -425,6 +438,12 @@ class _PhotoPreviewGalleryState extends State<PhotoPreviewGallery>
               PhotoViewControllerValue controllerValue,
             ) {
               pageOption.onScaleEnd?.call(context, details, controllerValue);
+            },
+            onDoubleTap: () {
+              if (!(_animationController.isCompleted ||
+                  _animationController.isAnimating)) {
+                _animationController.forward();
+              }
             },
           );
 

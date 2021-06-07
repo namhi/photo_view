@@ -126,6 +126,7 @@ mixin PhotoViewControllerDelegate on State<PhotoViewCore> {
   }
 
   void nextScaleState() {
+    widget.onDoubleTap?.call();
     final PhotoViewScaleState scaleState = scaleStateController.scaleState;
     if (scaleState == PhotoViewScaleState.zoomedIn ||
         scaleState == PhotoViewScaleState.zoomedOut) {

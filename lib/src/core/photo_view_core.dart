@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photo_view/photo_view.dart'
     show
@@ -45,6 +46,7 @@ class PhotoViewCore extends StatefulWidget {
     required this.disableGestures,
     this.onScaleStart,
     this.onScaleUpdate,
+    this.onDoubleTap,
   })  : customChild = null,
         super(key: key);
 
@@ -60,6 +62,7 @@ class PhotoViewCore extends StatefulWidget {
     this.onScaleStart,
     this.onScaleUpdate,
     this.gestureDetectorBehavior,
+    this.onDoubleTap,
     required this.controller,
     required this.scaleBoundaries,
     required this.scaleStateCycle,
@@ -90,7 +93,7 @@ class PhotoViewCore extends StatefulWidget {
   final PhotoViewImageScaleEndCallback? onScaleEnd;
   final PhotoViewImageScaleStartCallback? onScaleStart;
   final PhotoViewImageScaleUpdateCallback? onScaleUpdate;
-
+  final GestureDoubleTapCallback? onDoubleTap;
   final HitTestBehavior? gestureDetectorBehavior;
   final bool tightMode;
   final bool disableGestures;
