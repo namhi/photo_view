@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:photo_view_example/screens/common/app_bar.dart';
+import 'package:photo_view_example/screens/examples/preview_gallery/preview_photo_dialog.dart';
 
 class PreviewGalleryExample extends StatefulWidget {
   @override
@@ -15,81 +16,88 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
     'https://static8.depositphotos.com/1020341/896/i/950/depositphotos_8969502-stock-photo-human-face-with-cracked-texture.jpg',
     'https://www.imagdisplays.co.uk/wp-content/uploads/2021/04/IMG_8315-scaled-e1618243394893-1900x1216.jpg',
     'https://statics.tpos.vn/images/tmt25/210526/090059_product_image_picker7087741224206715181.jpg',
-  ];
+    'https://statics.tpos.vn/images/tmt25/210526/090059_product_image_picker7087741224206715181.jpg',
+    'https://statics.tpos.vn/images/tmt25/210526/090059_product_image_picker7087741224206715181.jpg',
+];
+  void openDialog(BuildContext context) => showNetworkPhotoGalleryDialog(
+      imageUrls: _imageUrls,
+      context: context,
+      initialPage: 0
+  );
 
-  void openDialog(BuildContext context) => showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-              insetPadding: EdgeInsets.zero,
-              child: Container(
-                color: Colors.black,
-                height: MediaQuery.of(context).size.height,
-                child: PhotoPreviewGallery.builder(
-                  builder: (BuildContext context, int index) {
-                    return PhotoViewGalleryPageOptions(
-                      imageProvider: NetworkImage(_imageUrls[index]),
-                      minScale: PhotoViewComputedScale.contained,
-                      initialScale: PhotoViewComputedScale.contained,
-                    );
-                  },
-                  previewOptions: _imageUrls
-                      .asMap()
-                      .entries
-                      .map((e) => PhotoPreviewOptions.customBuilder(
-                            selectedBuilder: (BuildContext context, int index) {
-                              return Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(8)),
-                                  border: Border.all(color: Colors.white),
-                                  image: DecorationImage(
-                                      image: NetworkImage(_imageUrls[index]),
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment.center),
-                                  color: Colors.white,
-                                ),
-                              );
-                            },
-                            builder: (BuildContext context, int index) {
-                              return Container(
-                                width: 100,
-                                height: 100,
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(8)),
-                                        // border: Border.all(color: Colors.white),
-                                        image: DecorationImage(
-                                            image:
-                                                NetworkImage(_imageUrls[index]),
-                                            fit: BoxFit.cover,
-                                            alignment: Alignment.center),
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(8)),
-                                        color: Colors.black.withAlpha(150),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              );
-                            },
-                          ))
-                      .toList(),
-                  itemCount: _imageUrls.length,
-                ),
-              ));
-        },
-      );
+  // void openDialog(BuildContext context) => showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return Dialog(
+  //             insetPadding: EdgeInsets.zero,
+  //             child: Container(
+  //               color: Colors.black,
+  //               height: MediaQuery.of(context).size.height,
+  //               child: PhotoPreviewGallery.builder(
+  //                 builder: (BuildContext context, int index) {
+  //                   return PhotoViewGalleryPageOptions(
+  //                     imageProvider: NetworkImage(_imageUrls[index]),
+  //                     minScale: PhotoViewComputedScale.contained,
+  //                     initialScale: PhotoViewComputedScale.contained,
+  //                   );
+  //                 },
+  //                 previewOptions: _imageUrls
+  //                     .asMap()
+  //                     .entries
+  //                     .map((e) => PhotoPreviewOptions.customBuilder(
+  //                           selectedBuilder: (BuildContext context, int index) {
+  //                             return Container(
+  //                               width: 100,
+  //                               height: 100,
+  //                               decoration: BoxDecoration(
+  //                                 borderRadius: const BorderRadius.all(
+  //                                     Radius.circular(8)),
+  //                                 border: Border.all(color: Colors.white),
+  //                                 image: DecorationImage(
+  //                                     image: NetworkImage(_imageUrls[index]),
+  //                                     fit: BoxFit.cover,
+  //                                     alignment: Alignment.center),
+  //                                 color: Colors.white,
+  //                               ),
+  //                             );
+  //                           },
+  //                           builder: (BuildContext context, int index) {
+  //                             return Container(
+  //                               width: 100,
+  //                               height: 100,
+  //                               child: Stack(
+  //                                 children: [
+  //                                   Container(
+  //                                     decoration: BoxDecoration(
+  //                                       borderRadius: const BorderRadius.all(
+  //                                           Radius.circular(8)),
+  //                                       // border: Border.all(color: Colors.white),
+  //                                       image: DecorationImage(
+  //                                           image:
+  //                                               NetworkImage(_imageUrls[index]),
+  //                                           fit: BoxFit.cover,
+  //                                           alignment: Alignment.center),
+  //                                       color: Colors.white,
+  //                                     ),
+  //                                   ),
+  //                                   Container(
+  //                                     decoration: BoxDecoration(
+  //                                       borderRadius: const BorderRadius.all(
+  //                                           Radius.circular(8)),
+  //                                       color: Colors.black.withAlpha(150),
+  //                                     ),
+  //                                   )
+  //                                 ],
+  //                               ),
+  //                             );
+  //                           },
+  //                         ))
+  //                     .toList(),
+  //                 itemCount: _imageUrls.length,
+  //               ),
+  //             ));
+  //       },
+  //     );
 
   void openCustomDialog(BuildContext context) {
     showCustomDialog<void>(

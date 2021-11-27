@@ -137,41 +137,71 @@ Future<void> showNetworkPhotoGalleryDialog({
     itemCount: imageUrls.length,
     initialPage: initialPage,
     previewBuilder: (BuildContext context, int index) {
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        child: Stack(
-          children: [
-            _buildCachedImage(
-              width: 100,
-              height: 100,
-              imageUrl: imageUrls[index],
-              imageBuilder:
-                  (BuildContext context, ImageProvider imageProvider) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              },
-            ),
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                color: Colors.black.withAlpha(150),
-              ),
-            )
-          ],
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(50)),
+          ),
         ),
       );
+      // return Container(
+      //   margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      //   child: Stack(
+      //     children: [
+      //       _buildCachedImage(
+      //         width: 100,
+      //         height: 100,
+      //         imageUrl: imageUrls[index],
+      //         imageBuilder:
+      //             (BuildContext context, ImageProvider imageProvider) {
+      //           return Container(
+      //             decoration: BoxDecoration(
+      //               borderRadius: const BorderRadius.all(Radius.circular(8)),
+      //               image: DecorationImage(
+      //                 image: imageProvider,
+      //                 fit: BoxFit.cover,
+      //               ),
+      //             ),
+      //           );
+      //         },
+      //       ),
+      //       Container(
+      //         width: 100,
+      //         height: 100,
+      //         decoration: BoxDecoration(
+      //           borderRadius: const BorderRadius.all(Radius.circular(8)),
+      //           color: Colors.black.withAlpha(150),
+      //         ),
+      //       )
+      //     ],
+      //   ),
+      // );
     },
     context: context,
     selectedPreviewBuilder: (BuildContext context, int index) {
+      // return Container(
+      //   width: 10,
+      //   height: 10,
+      //   decoration: BoxDecoration(
+      //       color: Colors.white,
+      //       borderRadius: BorderRadius.circular(50)
+      //   ),
+      // );
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+                color: Colors.red, borderRadius: BorderRadius.circular(50)),
+          ),
+        ),
+      );
       return Container(
         width: 100,
         height: 100,

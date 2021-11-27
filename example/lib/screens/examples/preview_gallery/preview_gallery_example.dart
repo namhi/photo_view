@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:photo_view_example/screens/common/app_bar.dart';
+import 'package:photo_view_example/screens/examples/preview_gallery/preview_photo_dialog.dart';
 
 class PreviewGalleryExample extends StatefulWidget {
   @override
@@ -17,78 +18,10 @@ class _PreviewGalleryExampleState extends State<PreviewGalleryExample> {
     'https://statics.tpos.vn/images/tmt25/210526/090059_product_image_picker7087741224206715181.jpg',
   ];
 
-  void openDialog(BuildContext context) => showDialog(
+  void openDialog(BuildContext context) => showNetworkPhotoGalleryDialog(
+    imageUrls: _imageUrls,
     context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-          insetPadding: EdgeInsets.zero,
-          child: Container(
-            color: Colors.black,
-            height: MediaQuery.of(context).size.height,
-            child: PhotoPreviewGallery.builder(
-              builder: (BuildContext context, int index) {
-                return PhotoViewGalleryPageOptions(
-                  imageProvider: NetworkImage(_imageUrls[index]),
-                  minScale: PhotoViewComputedScale.contained,
-                  initialScale: PhotoViewComputedScale.contained,
-                );
-              },
-              previewOptions: _imageUrls
-                  .asMap()
-                  .entries
-                  .map((e) => PhotoPreviewOptions.customBuilder(
-                selectedBuilder: (BuildContext context, int index) {
-                  return Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(
-                          Radius.circular(8)),
-                      border: Border.all(color: Colors.white),
-                      image: DecorationImage(
-                          image: NetworkImage(_imageUrls[index]),
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center),
-                      color: Colors.white,
-                    ),
-                  );
-                },
-                builder: (BuildContext context, int index) {
-                  return Container(
-                    width: 100,
-                    height: 100,
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(8)),
-                            // border: Border.all(color: Colors.white),
-                            image: DecorationImage(
-                                image:
-                                NetworkImage(_imageUrls[index]),
-                                fit: BoxFit.cover,
-                                alignment: Alignment.center),
-                            color: Colors.white,
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(8)),
-                            color: Colors.black.withAlpha(150),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-              ))
-                  .toList(),
-              itemCount: _imageUrls.length,
-            ),
-          ));
-    },
+    initialPage: 0
   );
 
   void openCustomDialog(BuildContext context) {

@@ -1,5 +1,6 @@
 //@dart=2.12
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_slide_gallery.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:photo_view_example/screens/examples/preview_gallery/preview_photo_dialog.dart';
@@ -35,7 +36,7 @@ class AppPhotoGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PhotoPreviewGallery.builder(
+    return PhotoSlideGallery.builder(
       initialPage: initialPage,
       loadingBuilder: (BuildContext context, ImageChunkEvent? event) {
         return const Center(child: LoadingIndicator());

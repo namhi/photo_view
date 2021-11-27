@@ -10,6 +10,7 @@ import 'package:photo_view/src/photo_view_scale_state.dart';
 import 'package:photo_view/src/photo_view_wrappers.dart';
 import 'package:photo_view/src/utils/photo_view_hero_attributes.dart';
 
+export 'photo_slide_gallery.dart';
 export 'src/controller/photo_view_controller.dart';
 export 'src/controller/photo_view_scalestate_controller.dart';
 export 'src/core/photo_view_gesture_detector.dart'
