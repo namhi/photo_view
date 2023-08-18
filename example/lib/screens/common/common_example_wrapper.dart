@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:tmt_photo_view/photo_view.dart';
 
 class CommonExampleRouteWrapper extends StatelessWidget {
   const CommonExampleRouteWrapper({

@@ -3,7 +3,7 @@ library photo_view_gallery;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photo_view/photo_view.dart'
+import 'package:tmt_photo_view/photo_view.dart'
     show
         LoadingBuilder,
         PhotoView,
@@ -13,11 +13,11 @@ import 'package:photo_view/photo_view.dart'
         PhotoViewImageTapDownCallback,
         PhotoViewImageTapUpCallback,
         ScaleStateCycle;
-import 'package:photo_view/src/controller/photo_view_controller.dart';
-import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
-import 'package:photo_view/src/core/photo_view_gesture_detector.dart';
-import 'package:photo_view/src/photo_view_scale_state.dart';
-import 'package:photo_view/src/utils/photo_view_hero_attributes.dart';
+import 'package:tmt_photo_view/src/controller/photo_view_controller.dart';
+import 'package:tmt_photo_view/src/controller/photo_view_scalestate_controller.dart';
+import 'package:tmt_photo_view/src/core/photo_view_gesture_detector.dart';
+import 'package:tmt_photo_view/src/photo_view_scale_state.dart';
+import 'package:tmt_photo_view/src/utils/photo_view_hero_attributes.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 part 'photo_preview_gallery.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:tmt_photo_view/photo_view.dart';
+import 'package:tmt_photo_view/photo_view_gallery.dart';
 import 'package:photo_view_example/screens/common/app_bar.dart';
 import 'package:photo_view_example/screens/examples/gallery/gallery_example_item.dart';
 
