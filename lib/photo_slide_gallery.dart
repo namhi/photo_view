@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:tmt_photo_view/photo_view.dart';
+import 'package:tmt_photo_view/photo_view_gallery.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class PhotoSlideGallery extends StatefulWidget {

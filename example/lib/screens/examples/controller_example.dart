@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:tmt_photo_view/photo_view.dart';
 import 'package:photo_view_example/screens/common/app_bar.dart';
 
 class ControllerExample extends StatefulWidget {

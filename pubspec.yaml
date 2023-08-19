@@ -1,4 +1,4 @@
-name: photo_view
+name: tmt_photo_view
 description: Photo View provides a gesture sensitive zoomable widget. Photo View is largely used to show interactive images and other stuff such as SVG.
 version: 0.11.1
 homepage: https://github.com/renancaraujo/photo_view
